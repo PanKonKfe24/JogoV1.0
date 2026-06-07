@@ -3,8 +3,11 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
+
+    [Header("Components")]
     public Rigidbody2D rb;
     public PlayerInput playerInput;
+    public Animator anim;
 
     [Header("Movement Variables")]
     public float speed;
@@ -15,7 +18,11 @@ public class Player : MonoBehaviour
     public float jumpGravity;
 
     public int facingDirection = 1;
-    public Vector2 moveInput;
+
+    //Inputs
+    private Vector2 moveInput;
+    private bool jumpPressed;
+    private bool jumpReleased;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -30,15 +37,40 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        ApplyVariableGravity();
-        CheckGrounded();
+        HandlerAnimations();
         Flip();
     }
 
     void FixedUpdate()
     {
+        ApplyVariableGravity();
+        CheckGrounded();
+        HandlerMovement();
+        HandlerJump();
+    }
+
+    private void HandlerMovement()
+    {
         float targetSpeed = moveInput.x * speed;
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocityY);
+    }
+
+    private void HandlerJump()
+    {
+        if (jumpPressed && isGrounded)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            jumpPressed = false;
+            jumpReleased = false;
+        }
+        if (jumpReleased)
+        {
+            if (rb.linearVelocity.y > 0)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
+            }
+            jumpReleased = true;
+        }
     }
 
     void ApplyVariableGravity()
@@ -62,6 +94,11 @@ public class Player : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
     }
 
+    void HandlerAnimations()
+    {
+        anim.SetBool("isIdle", Mathf.Abs(moveInput.x) < .1f && isGrounded);
+    }
+
     void Flip()
     {
         if(moveInput.x > 0.1f)
@@ -82,16 +119,14 @@ public class Player : MonoBehaviour
 
     public void OnJump (InputValue value)
     {
-        if(value.isPressed && isGrounded)
+        if(value.isPressed)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            jumpPressed = true;
+            jumpReleased = false;
         }
         else
         {
-            if(rb.linearVelocity.y > 0)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
-            }
+            jumpReleased = true;
         }
     }
 

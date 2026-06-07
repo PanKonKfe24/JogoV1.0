@@ -41,6 +41,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Fondo
+    uniqueID: 1057592397
+    locked: 0
+  - name: Player
+    uniqueID: 2528254121
+    locked: 0
+  - name: Ground
+    uniqueID: 110775157
+    locked: 0
+  - name: Detalles
+    uniqueID: 3356381821
+    locked: 0
   m_RenderingLayers:
   - Default
   m_MigratedRenderPipelines: []
