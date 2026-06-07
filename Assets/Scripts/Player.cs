@@ -97,6 +97,7 @@ public class Player : MonoBehaviour
     void HandlerAnimations()
     {
         anim.SetBool("isIdle", Mathf.Abs(moveInput.x) < .1f && isGrounded);
+        anim.SetBool("isWalking", Mathf.Abs(moveInput.x) > .1f && isGrounded);
     }
 
     void Flip()
