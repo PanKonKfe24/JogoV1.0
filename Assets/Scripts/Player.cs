@@ -96,6 +96,11 @@ public class Player : MonoBehaviour
 
     void HandlerAnimations()
     {
+        anim.SetBool("isJumping", rb.linearVelocity.y > .1f);
+        anim.SetBool("isGrounded", isGrounded);
+
+        anim.SetFloat("yVelocity", rb.linearVelocity.y);
+
         anim.SetBool("isIdle", Mathf.Abs(moveInput.x) < .1f && isGrounded);
         anim.SetBool("isWalking", Mathf.Abs(moveInput.x) > .1f && isGrounded);
     }
