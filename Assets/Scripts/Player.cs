@@ -33,6 +33,11 @@ public class Player : MonoBehaviour
     public LayerMask groundLayer;
     private bool isGrounded;
 
+    [Header("Slide Settings")]
+    public float slideDuration = .2f;
+    private bool isSliding;
+    private float slideTimer;
+
     private void Start()
     {
         rb.gravityScale = normalGravity;
@@ -42,13 +47,18 @@ public class Player : MonoBehaviour
     {
         HandlerAnimations();
         Flip();
+        HandleSlide();
     }
 
     void FixedUpdate()
     {
         ApplyVariableGravity();
         CheckGrounded();
-        HandlerMovement();
+
+        if (!isSliding)
+        {
+            HandlerMovement();
+        }
         HandlerJump();
     }
 
@@ -77,6 +87,25 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void HandleSlide()
+    {
+        if (isSliding)
+        {
+            slideTimer -= Time.deltaTime;
+
+            if(slideTimer <= 0)
+            {
+                isSliding = false;
+            }
+        }
+
+        if (isGrounded && runPressed && moveInput.y < -.1f && !isSliding)
+        {
+            isSliding = true;
+            slideTimer = slideDuration;
+        }
+    }
+
     void ApplyVariableGravity()
     {
         if(rb.linearVelocity.y < -0.1f)
@@ -102,14 +131,15 @@ public class Player : MonoBehaviour
     {
         anim.SetBool("isJumping", rb.linearVelocity.y > .1f);
         anim.SetBool("isGrounded", isGrounded);
+        anim.SetBool("isSliding", isSliding);
 
         anim.SetFloat("yVelocity", rb.linearVelocity.y);
 
         bool isMoving = Mathf.Abs(moveInput.x) > .1f && isGrounded;
 
-        anim.SetBool("isIdle", !isMoving && isGrounded);
-        anim.SetBool("isWalking", isMoving && !runPressed);
-        anim.SetBool("isRunning", isMoving && runPressed);
+        anim.SetBool("isIdle", !isMoving && isGrounded && !isSliding);
+        anim.SetBool("isWalking", isMoving && !runPressed && !isSliding);
+        anim.SetBool("isRunning", isMoving && runPressed && !isSliding);
     }
 
     void Flip()
