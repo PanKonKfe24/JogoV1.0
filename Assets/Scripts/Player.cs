@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public Rigidbody2D rb;
     public PlayerInput playerInput;
     public Animator anim;
+    public CapsuleCollider2D playerCollider;
 
     [Header("Movement Variables")]
     public float unicSkillSpeed;
@@ -35,8 +36,19 @@ public class Player : MonoBehaviour
 
     [Header("Slide Settings")]
     public float slideDuration = .2f;
+    public float slideSpeed = 12;
+    public float slideStopDuration = .15f;
+
+    public float slideHeight;
+    public Vector2 slideOffset;
+    public float normalHeight;
+    public Vector2 normalOffset;
+
     private bool isSliding;
+    private bool slideInputLocked;
     private float slideTimer;
+    private float slideStopTimer;
+
 
     private void Start()
     {
@@ -45,8 +57,11 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (!isSliding)
+        {
+            Flip();
+        }
         HandlerAnimations();
-        Flip();
         HandleSlide();
     }
 
@@ -92,17 +107,32 @@ public class Player : MonoBehaviour
         if (isSliding)
         {
             slideTimer -= Time.deltaTime;
+            rb.linearVelocity = new Vector2(slideSpeed * facingDirection, rb.linearVelocity.y);
 
             if(slideTimer <= 0)
             {
                 isSliding = false;
+                slideStopTimer = slideStopDuration;
             }
         }
 
-        if (isGrounded && runPressed && moveInput.y < -.1f && !isSliding)
+        if(slideStopTimer > 0)
+        {
+            slideStopTimer -= Time.deltaTime;
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        }
+
+
+        if (isGrounded && runPressed && moveInput.y < -.1f && !isSliding && !slideInputLocked)
         {
             isSliding = true;
+            slideInputLocked = true;
             slideTimer = slideDuration;
+        }
+
+        if (slideStopTimer < 0 && moveInput.y >= -.1f)
+        {
+            slideInputLocked = false;
         }
     }
 
